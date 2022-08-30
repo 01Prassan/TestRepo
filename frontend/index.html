@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'>
+    <link rel="stylesheet" href="./style.css">
+
+</head>
+
+<body>
+
+    <div class='loader'>
+        <div class='loader_inner'></div>
+    </div>
+    <div id='canvas'></div>
+    <div class='ui'>
+        <div class='noise'></div>
+        <div class='vig'></div>
+        <div class='bloom'></div>
+        <div class='fullscreen'>
+            <i class='fa fa-expand'></i>
+        </div>
+        <div class='left button'>
+            <img src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/217233/arrowBg.png'>
+        </div>
+        <div class='right button'>
+            <img src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/217233/arrowBg.png'>
+        </div>
+        <div class='box'>
+            <div class='box_inner' data-deep-animate-time='.7' data-deep-animate='false' data-deep-ui='true'>
+                <div class='box_inner__title' data-depth='20'>
+                    Gift Box Info
+                </div>
+
+                <div class='box_inner__text' data-depth='10'>
+                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
+                </div>
+                <div class='box_inner__cost' data-depth='31'>
+                    <div class='left'>
+                        <i class='fa fa-diamond'></i>
+                    </div>
+                    <div class='right'>
+                        Price ($0)
+                    </div>
+                </div>
+                <div class='box_inner__cta' data-depth='31'>
+                    <span data-depth='44'>Go Ahead</span>
+                </div>
+            </div>
+        </div>
+        <div class="controls">
+            <div style="margin:6px"><label for="frame" class="frameLabel">WiredFrame</label>
+                <select id="language" onChange="update()">
+                    <option value="" selected hidden>Please select</option>
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
+            </div>
+            <div style="margin:6px">
+                <label for="frame" class="frameLabel">Spotlight Color</label>
+                <select id="spotlight" onChange="updateSpotLight()">
+                    <option value="" selected hidden>Select Color</option>
+                    <option value="#1589FF">Neon Blue</option>
+                    <option value="#0AFFFF">Bright Cyan</option>
+                    <option value="#16F529">Neon Green</option>
+                    <option value="#1569C7">Blue Eyes</option>
+                    <option value="#C34A2C">Red</option>
+                    <option value="#F67280">Pastel Red</option>
+                    <option value="#C48189">Pink Brown</option>
+                    <option value="#000000">Black</option>
+                    <option value="#FFFFFF">White</option>
+                </select>
+            </div>
+            <div style="margin:6px">
+                <label for="frame" class="frameLabel">floor Width</label>
+                <input id="myInput" style=" width: 68px;" type="number" placeholder="Ex: 200">
+                <button onclick="updateWidth()">Done</button>
+            </div>
+            <div style="margin:6px">
+                <label for="frame" class="frameLabel">floor Height</label>
+                <input id="myInput2" style=" width: 68px;" type="number" placeholder="Ex: 100">
+                <button onclick="updateHeight()">Done</button>
+            </div>
+            <div style="margin:6px">
+                <label for="frame" class="frameLabel">Block Difference</label>
+                <input id="myInput3" style=" width: 68px;" type="number" placeholder="Ex:15,20">
+                <button onclick="CrateOffset()">Done</button>
+            </div>
+            <div style="margin:6px">
+                <label for="frame" class="frameLabel">Camera Move Speed</label>
+                <input id="myInput4" style=" width: 68px;" type="text" placeholder="Ex:1.2, 0.2">
+                <button onclick="cameramovespeed()">Done</button>
+            </div>
+        </div>
+    </div>
+    <!-- scripts -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.1/TweenMax.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.min.js'></script>
+    <script src='https://threejs.org/examples/js/controls/OrbitControls.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"></script>
+    <script>
+        //Update Wireframe
+        async function update() {
+            var select = document.getElementById('language');
+            var option = select.options[select.selectedIndex];
+            document.getElementById("language").value = option.value;
+            const s = await axios.patch(`http://192.168.20.125:8080`, {
+                wireframe: option.value
+            })
+            history.go(0)
+        }
+
+        //Update Spotlight
+        async function updateSpotLight() {
+            var select = document.getElementById('spotlight');
+            var option = select.options[select.selectedIndex];
+            document.getElementById("spotlight").value = option.value;
+            const s = await axios.patch(`http://192.168.20.125:8080`, {
+                spotLightColor: option.value
+            })
+            history.go(0)
+        }
+
+        //Update Floor Width
+        async function updateWidth() {
+            var select = document.getElementById('myInput');
+            var option = select.value
+            const s = await axios.patch(`http://192.168.20.125:8080`, {
+                floorWidth: option
+            })
+            history.go(0)
+
+        }
+
+        //Update Floor Height
+        async function updateHeight() {
+            var select = document.getElementById('myInput2');
+            var option = select.value
+            const s = await axios.patch(`http://192.168.20.125:8080`, {
+                floorHeight: option
+            })
+
+            history.go(0)
+
+        }
+
+        //Update Box Difference
+        async function CrateOffset() {
+            var select = document.getElementById('myInput3');
+            var option = select.value
+            const s = await axios.patch(`http://192.168.20.125:8080`, {
+                crateOffset: option
+            })
+            history.go(0)
+        }
+
+        //Update Box Camera Speed
+        async function cameramovespeed() {
+            var select = document.getElementById('myInput4');
+            var option = select.value
+            const s = await axios.patch(`http://192.168.20.125:8080`, {
+                cameraMoveSpeed: option
+            })
+            history.go(0)
+        }
+
+        // Get Data Through Api
+        const myData = function(data) {
+            wireframe = data.wireframe;
+            spotLightColor = data.spotLightColor;
+            crateOffset = data.crateOffset;
+            cameraMoveSpeed = data.cameraMoveSpeed;
+            floorWidth = data.floorWidth;
+            floorHeight = data.floorHeight;
+
+            var scene,
+                camera,
+                cameraControls,
+                can_click = 1,
+                position = 0,
+                spotLight,
+                particles = [],
+                Lights = [],
+                gems = [];
+
+
+            // Create Audio
+            crateSmash = new Audio("https://s3-us-west-2.amazonaws.com/s.cdpn.io/217233/31622__srehpog__light-crate-smash1.wav");
+            bg = new Audio("https://www.jamiecoulter.co.uk/bensound-betterdays.mp3");
+            bgEffect = new Audio("https://www.jamiecoulter.co.uk/wooden.mp3");
+            menuclick = new Audio("https://s3-us-west-2.amazonaws.com/s.cdpn.io/217233/menuclick.wav");
+            slide = new Audio("https://www.jamiecoulter.co.uk/slide.mp3");
+            audio = true;
+            sceneLoadDelay = 500;
+            cameraX = 11;
+            cameraY = 1;
+            cameraZ = 11;
+            cameraZoom = 2;
+            cameraMoveDelay = 0.5;
+            sceneOffset = 1;
+
+            sceneBg = "black";
+
+            globalAmbienceIntensity = 0.06;
+            globalAmbienceColor = "#d39cf3";
+
+
+            spotLightIntensity = 10;
+
+
+            parallaxSeperation = 1;
+            parallaxMidModifier = 3;
+
+            rockAnimationDelay = 0.6;
+
+            rockAnimationDurationOne = 0.56;
+            rockAnimationRotationOne = -0.93;
+
+            rockAnimationDurationTwo = 0.2;
+            rockAnimationRotationTwo = 0;
+
+            rockAnimationDurationThree = 0.27;
+            rockAnimationRotationThree = 0.25;
+
+            rockAnimationDurationFour = 0.12;
+            rockAnimationRotationFour = 0;
+
+            rockAnimationDurationFive = 0.1;
+            rockAnimationRotationFive = -0.1;
+
+            rockAnimationDurationSix = 0.05;
+            rockAnimationRotationSix = 0;
+
+            smokeAmount = 40;
+            smokeDelay = 1000;
+            particleAmount = 1000;
+            particleMaxSize = 15
+
+            gemAmount = 50;
+            gemScale = 0.001;
+            gemColor = "green";
+
+            menuclick.volume = 0.3;
+            bgEffect.volume = 0.3;
+            bgEffect.loop = true;
+            bg.volume = 0.2;
+            crateSmash.volume = 0.4;
+            slide.volume = 0.2;
+            slidePlayDelay = 500;
+
+            function playSound(sound) {
+                if (audio) {
+                    sound.play();
+                }
+            }
+
+            THREE.DefaultLoadingManager.onProgress = function(item, loaded, total) {
+                var percent = (loaded / total) * 100;
+                $(".loader_inner").css("width", percent + "%");
+                if (loaded == total) {
+                    $(".loader").fadeOut();
+                    setTimeout(function() {
+                        $("#canvas,.ui").fadeIn();
+                        playSound(bg);
+                        playSound(bgEffect);
+                    }, sceneLoadDelay);
+                }
+            };
+
+            function startScene() {
+
+                var canvasWidth = window.innerWidth,
+                    canvasHeight = window.innerHeight,
+                    container = document.getElementById("canvas");
+
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(sceneBg);
+
+                ambientLight = new THREE.AmbientLight(globalAmbienceColor, globalAmbienceIntensity);
+                scene.add(ambientLight);
+
+                for (i = 0; i < 4; i++) {
+                    l = new THREE.PointLight(spotLightColor, 20, 10, 4, spotLightIntensity);
+                    l.position.set(5, 4, -i * crateOffset);
+                    l.castShadow = true;
+                    scene.add(l);
+                }
+
+                camera = new THREE.PerspectiveCamera(45, canvasWidth / canvasHeight, 1, 13000);
+                camera.lookAt(scene.position);
+                camera.position.set(cameraX, cameraY, cameraZ);
+                camera.zoom = cameraZoom;
+                camera.updateProjectionMatrix();
+
+                renderer = new THREE.WebGLRenderer({
+                    antialias: true
+                });
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.setSize(canvasWidth, canvasHeight);
+                renderer.gammaInput = true;
+                renderer.gammaOutput = true;
+                renderer.shadowMapEnabled = true;
+                renderer.shadowMapType = THREE.PCFSoftShadowMap;
+                container.appendChild(renderer.domElement);
+
+
+                window.addEventListener("resize", onWindowResize, false);
+
+                cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
+
+                object = function() {
+                    THREE.Mesh.apply(this, arguments);
+                };
+                object.prototype = Object.create(THREE.Mesh.prototype);
+                object.prototype.constructor = object;
+                object.verticesNeedUpdate = true;
+
+                THREE.ImageUtils.crossOrigin = "";
+
+                grassTexture = THREE.ImageUtils.loadTexture("https://s3-us-west-2.amazonaws.com/s.cdpn.io/217233/cartoon_grass.jpg");
+                grassTexture.wrapS = grassTexture.wrapT = THREE.RepeatWrapping;
+                grassTexture.repeat.set(40, 100);
+
+                forestFrontTexture = THREE.ImageUtils.loadTexture("https://s3-us-west-2.amazonaws.com/s.cdpn.io/217233/forestPanelFront.png");
+                forestFrontTexture.wrapS = forestFrontTexture.wrapT = THREE.RepeatWrapping;
+                forestFrontTexture.repeat.set(10, 1);
+
+                forestMidTexture = THREE.ImageUtils.loadTexture("https://s3-us-west-2.amazonaws.com/s.cdpn.io/217233/forestPanelMid.png");
+                forestMidTexture.wrapS = forestMidTexture.wrapT = THREE.RepeatWrapping;
+                forestMidTexture.repeat.set(10, 1);
+
+                particleTexture = THREE.ImageUtils.loadTexture("https://s3-us-west-2.amazonaws.com/s.cdpn.io/217233/particleTexture.png");
+
+                crateTexture = THREE.ImageUtils.loadTexture("https://s3-us-west-2.amazonaws.com/s.cdpn.io/217233/create4texture.png");
+                crateTexture2 = THREE.ImageUtils.loadTexture("https://s3-us-west-2.amazonaws.com/s.cdpn.io/217233/crate2.png");
+                crateTexture3 = THREE.ImageUtils.loadTexture("https://s3-us-west-2.amazonaws.com/s.cdpn.io/217233/crate5.jpg");
+                crateTexture4 = THREE.ImageUtils.loadTexture("https://s3-us-west-2.amazonaws.com/s.cdpn.io/217233/crate3.jpg");
+
+                smokeMaterial = new THREE.MeshPhongMaterial({
+                    shading: THREE.SmoothShading,
+                    color: "white",
+                    transparent: true,
+                    opacity: 0
+                });
+                particleMaterial = new THREE.MeshPhongMaterial({
+                    shading: THREE.SmoothShading,
+                    transparent: true,
+                    color: "white",
+                    map: particleTexture
+                });
+                forestMaterialFront = new THREE.MeshPhongMaterial({
+                    map: forestFrontTexture,
+                    transparent: true,
+                    shininess: 0
+                });
+                forestMaterialMid = new THREE.MeshPhongMaterial({
+                    color: "#bd137b",
+                    map: forestMidTexture,
+                    transparent: false
+                });
+                grassMaterial = new THREE.MeshPhongMaterial({
+                    color: "#730549",
+                    shading: THREE.SmoothShading,
+                    map: grassTexture,
+                    shininess: 0
+                });
+                crateMaterial = new THREE.MeshPhongMaterial({
+                    shading: THREE.SmoothShading,
+                    map: crateTexture,
+                });
+                crateMaterial2 = new THREE.MeshPhongMaterial({
+                    shading: THREE.SmoothShading,
+                    map: crateTexture2,
+                });
+                crateMaterial3 = new THREE.MeshPhongMaterial({
+                    shading: THREE.SmoothShading,
+                    map: crateTexture3,
+                });
+                crateMaterial4 = new THREE.MeshPhongMaterial({
+                    shading: THREE.SmoothShading,
+                    map: crateTexture4,
+                });
+
+
+                if (wireframe) {
+
+                    crateMaterial.wireframe = grassMaterial.wireframe = smokeMaterial.wireframe = forestMaterialMid = forestMaterialFront = true;
+                }
+
+                var floorGeometry = new THREE.PlaneGeometry(floorHeight, floorWidth, 20, 20);
+                var floor = new object(floorGeometry, grassMaterial);
+
+                floor.rotation.x = -Math.PI / 2;
+                floor.position.set(0, 0, -70);
+                floor.receiveShadow = true;
+
+                scene.add(floor);
+
+
+                var forestPanelFrontGeometry = new THREE.PlaneGeometry(floorWidth + 30, 34, 120, 20);
+                forestPanelFront = new object(forestPanelFrontGeometry, forestMaterialFront);
+                forestPanelMid = new object(forestPanelFrontGeometry, forestMaterialMid);
+                forestPanelMid.position.set(0, 0, -parallaxSeperation);
+
+                var forest = new THREE.Object3D;
+                forest.rotation.y = Math.PI / 2;
+                forest.position.set(-floorHeight / 2, 7, -70)
+                forest.add(forestPanelFront, forestPanelMid);
+
+                scene.add(forest);
+
+
+                var crateOneGeo = new THREE.BoxGeometry(2, 2, 2, 1, 1, 1);
+                var crateTwoGeo = new THREE.BoxGeometry(2, 2, 2, 1, 1, 1);
+                var crateThreeGeo = new THREE.BoxGeometry(2, 2, 2, 1, 1, 1);
+                var crateFourGeo = new THREE.BoxGeometry(2, 2, 2, 1, 1, 1);
+
+
+                var crateOne = new object(crateOneGeo, crateMaterial);
+                var crateTwo = new object(crateTwoGeo, crateMaterial2);
+                var crateThree = new object(crateThreeGeo, crateMaterial3);
+                var crateFour = new object(crateFourGeo, crateMaterial4);
+
+
+                crates = [];
+                crates.push(crateOne, crateTwo, crateThree, crateFour);
+
+                var smokeGeo = new THREE.BoxGeometry(1, 1, 1, 1, 1, 1);
+
+                for (i = 0; i < crates.length; i++) {
+                    crates[i].geometry.translate(0, 1, 1);
+                    crates[i].position.set(0, 0, (-i * crateOffset) + sceneOffset)
+                    crates[i].castShadow = true;
+                    for (a = 0; a < smokeAmount; a++) {
+                        s = new object(smokeGeo, smokeMaterial)
+                        num = (Math.random() * -2) + 1;
+                        s.position.set(num, -0.35, 0);
+                        s.scale.set(0.3, 0.3, 0.3);
+                        makeSmoke(s);
+                        crates[i].add(s);
+                    }
+                    scene.add(crates[i]);
+                }
+
+                for (i = 0; i < particleAmount; i++) {
+                    var psize = (Math.random() * particleMaxSize) / 100;
+                    var p = new THREE.CircleGeometry(psize, psize, psize);
+                    pm = new object(p, particleMaterial);
+                    pm.position.set(-Math.random() * 50 + 20, Math.random() * 7, -Math.random() * 100 + 10);
+                    particles.push(pm);
+                    scene.add(pm);
+                }
+
+                scene.position.set(0, -1, 0);
+
+            }
+
+            function timelines() {
+                for (i = 0; i < crates.length; i++) {
+                    var obj = crates[i];
+                    var translate = obj.geometry.parameters.width;
+                    var position = ((translate / 2) - (i * crateOffset) + sceneOffset) + 1;
+                    var positionOpposite = -((translate / 2) + (i * crateOffset) - sceneOffset) + 1;
+                    var tl = new TimelineMax({
+                        delay: rockAnimationDelay
+                    });
+                    tl.add(TweenLite.to(crates[i].rotation, rockAnimationDurationOne, {
+                        x: rockAnimationRotationOne,
+                        ease: Circ.easeInOut
+                    }));
+                    tl.add(TweenLite.to(crates[i].rotation, rockAnimationDurationTwo, {
+                        x: rockAnimationRotationTwo,
+                        onComplete: switchAnchor,
+                        onCompleteParams: [obj, -translate, position, 0],
+                        ease: Expo.easeIn
+                    }));
+                    tl.add(TweenLite.to(crates[i].rotation, rockAnimationDurationThree, {
+                        x: rockAnimationRotationThree,
+                        ease: Expo.easeOut
+                    }));
+                    tl.add(TweenLite.to(crates[i].rotation, rockAnimationDurationFour, {
+                        x: rockAnimationRotationFour,
+                        onComplete: switchAnchor,
+                        onCompleteParams: [obj, translate, positionOpposite, 0],
+                        ease: Expo.easeIn
+                    }));
+                    tl.add(TweenLite.to(crates[i].rotation, rockAnimationDurationFive, {
+                        x: rockAnimationRotationFive,
+                        ease: Expo.easeOut
+                    }));
+                    tl.add(TweenLite.to(crates[i].rotation, rockAnimationDurationSix, {
+                        x: rockAnimationRotationSix,
+                        onComplete: switchAnchor,
+                        onCompleteParams: [obj, 0, positionOpposite, 1],
+                        ease: Expo.easeIn
+                    }));
+                }
+            }
+
+            smokeAnims = []
+
+            function makeSmoke(obj) {
+                stl = new TimelineMax({})
+                stl.add([
+                    TweenLite.to(obj.scale, .5, {
+                        x: 0.01,
+                        y: 0.01,
+                        z: 0.01,
+                        ease: Expo.easeOut
+                    }),
+                    TweenLite.fromTo(obj.material, .5, {
+                        opacity: 1
+                    }, {
+                        opacity: 0
+                    }),
+                    TweenLite.to(obj.position, .5, {
+                        x: obj.position.x,
+                        y: .02 + Math.random() * 1.3,
+                        z: obj.position.z + Math.random() * 1.3,
+                        ease: Expo.easeOut
+                    })
+                ])
+                smokeAnims.push(stl);
+                stl.stop();
+            }
+
+            function playSmoke() {
+                for (i = 0; i < smokeAnims.length; i++) {
+                    let s = smokeAnims[i]
+                    setTimeout(function() {
+                        s.restart()
+                    }, 1400)
+
+                }
+            }
+
+            function switchAnchor(object, tZ, pZ, int) {
+                playSound(crateSmash);
+                object.geometry.translate(0, 0, tZ);
+                object.position.set(0, 0, pZ);
+                can_click = int;
+            }
+
+            function animateScene() {
+                requestAnimationFrame(animateScene);
+                render();
+            }
+
+            startScene();
+            animateScene();
+
+            function onWindowResize() {
+                var canvasWidth = window.innerWidth;
+                var canvasHeight = window.innerHeight;
+                renderer.setSize(canvasWidth, canvasHeight);
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                render();
+            }
+
+            crateInfoArray = [{
+                name: "Noob loot crate",
+                text: "You probably wont get much in this loot crate to be honest, but what can you expect for such a low cost?",
+                price: "20,000"
+            }, {
+                name: "Novice loot crate",
+                text: "This loot crate will contain a few relatively decent items that you can show off to your friends",
+                price: "49,999"
+            }, {
+                name: "Pro loot crate",
+                text: "Now we are talking, this crate contains loot for the professional player, weapons and items galore",
+                price: "119,999"
+            }, {
+                name: "God loot crate",
+                text: "Takes pay to win to a new level. Destroy your oppenents with this ultimate loot crate. Instawin",
+                price: "999,999"
+            }]
+
+            function crateInfo(crate) {
+                $(".box").fadeOut(function() {
+                    $(".box_inner__title").text(crateInfoArray[crate].name);
+                    $(".box_inner__text").text(crateInfoArray[crate].text);
+                    $(".box_inner__cost .right").text(crateInfoArray[crate].price);
+                });
+                setTimeout(function() {
+                    $(".box").fadeIn();
+                }, 2000);
+            }
+
+            function moveCamera(amount) {
+                var z = camera.position.z;
+                var move = z + amount;
+                TweenMax.to(camera.position, cameraMoveSpeed, {
+                    z: move,
+                    ease: Expo.easeInOut,
+                    delay: cameraMoveDelay
+                });
+                TweenMax.to(forestPanelMid.position, cameraMoveSpeed, {
+                    x: forestPanelMid.position.x - (amount / parallaxMidModifier),
+                    ease: Expo.easeInOut,
+                    delay: cameraMoveDelay
+                });
+                setTimeout(function() {
+                    playSound(slide);
+                }, slidePlayDelay);
+            }
+
+            $(".button").click(function() {
+                playSound(menuclick);
+                if (can_click == 1 && $(this).hasClass("left") && position > 0) {
+                    moveCamera(crateOffset);
+                    position--;
+                    crateInfo(position);
+                } else if (can_click == 1 && $(this).hasClass("right") && position < crates.length - 1) {
+                    can_click = 0;
+                    moveCamera(-crateOffset);
+                    position++;
+                    timelines();
+                    playSmoke();
+                    crateInfo(position);
+                }
+            });
+
+            function render() {
+                p = 0;
+                $.each(particles, function() {
+                    particles[p].position.y += Math.random() * 10 / 1000;
+                    if (particles[p].position.y > 7) {
+                        particles[p].position.y = 0;
+                    }
+                    p++;
+                });
+                renderer.render(scene, camera);
+            }
+
+            $(document).on("mousemove", function(e) {
+                var x = -(($(window).innerWidth() / 2 - e.pageX) / 6000) + cameraX;
+                var y = -((($(window).innerWidth() / 2 - e.pageY) / 6000) - cameraY);
+                camera.position.x = x;
+                camera.position.y = y;
+            });
+
+            function deep_ui() {
+                var global_perspective = 800;
+                var pivot = 50
+                var debug = false;
+                var animation_delay = 100;
+                var animation_easing = "ease";
+                var deep_parent = $("*[data-deep-ui='true']");
+                var deep_element = $("[data-depth]");
+                deep_parent.each(function() {
+                    $(this).css({
+                        "perspective": global_perspective + "px",
+                        "transform-style": "preserve-3d"
+                    })
+                    set_depth();
+                })
+
+                function set_depth() {
+                    deep_element.each(function() {
+                        $(this).css({
+                            "transform": "translatez(" +
+                                $(this).data("depth") +
+                                "px)",
+                            "transform-style": "preserve-3d"
+                        });
+                    });
+                }
+                $(document).on("mousemove", function(e) {
+                    var x = -($(window).innerWidth() / 2 - e.pageX) / pivot;
+                    var y = ($(window).innerHeight() / 2 - e.pageY) / pivot;
+                    deep_parent.css("transform", "rotateY(" + x + "deg) rotateX(" + y + "deg)");
+                });
+            }
+
+            deep_ui();
+
+            //  Full Screen Code
+            function fullscreen() {
+                document.documentElement.webkitRequestFullscreen();
+                document.documentElement.mozRequestFullScreen();
+                document.documentElement.msRequestFullscreen();
+                document.documentElement.requestFullscreen();
+            }
+
+            $(".fullscreen").click(function() {
+                fullscreen();
+            });
+
+        }
+
+        // Get Api Call In which need <http://192.168.20.125:8080> Backend Connectivity Code with port 
+
+        axios.get(`http://192.168.20.125:8080`).then(res => {
+            const persons = res.data.data;
+            return persons
+
+        }).then(myData).catch(err => {
+            console.log('Error: ', err);
+        })
+    </script>
+
+</body>
+
+</html>
